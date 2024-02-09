@@ -5,7 +5,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ArticleModule } from './article/article.module';
 import { CommentModule } from './comment/comment.module';
-import { AuthMiddleware } from './middlewares/auth.middleware';
 import { User } from './user/user.entity';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -40,13 +39,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    // Utilisez la méthode use() pour appliquer le middleware aux routes spécifiques
-    consumer.apply(AuthMiddleware).forRoutes(
-      { path: 'user/:id', method: RequestMethod.GET }, // Route getUser
-      { path: 'user/:id', method: RequestMethod.PUT }, // Route updateUser
-      { path: 'user/:id', method: RequestMethod.DELETE }, // Route deleteUser
-    );
-  }
-}
+export class AppModule {}
