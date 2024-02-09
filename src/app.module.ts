@@ -1,13 +1,28 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { CommentModule } from './comment/comment.module';
 import { ArticleModule } from './article/article.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { CommentModule } from './comment/comment.module';
+import { AuthMiddleware } from './middlewares/auth.middleware';
 import { User } from './user/user.entity';
+import { UserModule } from './user/user.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
+      inject: [ConfigService],
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: '127.0.0.1',
@@ -25,4 +40,13 @@ import { User } from './user/user.entity';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Utilisez la méthode use() pour appliquer le middleware aux routes spécifiques
+    consumer.apply(AuthMiddleware).forRoutes(
+      { path: 'user/:id', method: RequestMethod.GET }, // Route getUser
+      { path: 'user/:id', method: RequestMethod.PUT }, // Route updateUser
+      { path: 'user/:id', method: RequestMethod.DELETE }, // Route deleteUser
+    );
+  }
+}

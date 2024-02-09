@@ -1,16 +1,21 @@
-import { Body, Injectable, Req, Res } from '@nestjs/common';
+import { Body, Injectable, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { generateToken } from 'src/utils/Token';
 import { comparePassword, hashPassword } from 'src/utils/hash';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
-import { User } from './user.entity'; // Assurez-vous que le chemin est correct
+import { User } from './user.entity';
+import { RequestWithUser } from 'src/Types/interface';
+import { ConfigService } from '@nestjs/config';
+import { AuthGuard } from 'src/guard/auth.guard';
+import { Request } from 'express';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
   async createUser(@Body() userData: UserDto, @Res() res: Response) {
@@ -73,11 +78,77 @@ export class UserService {
           .status(400)
           .json({ statut: false, message: 'Email or password incorrect' });
       }
-      res.cookie('user', generateToken(user), { httpOnly: true });
+
+      const token = generateToken(user, this.configService);
+      res.cookie('user', token, { httpOnly: true });
       res.status(200).json({
         statut: true,
-        message: { ...user, token: generateToken(user) },
+        message: { ...user, token },
       });
+    } catch (e) {
+      res.status(500).json({ statut: false, message: e.message });
+    }
+  }
+
+  async logout(@Res() res: Response) {
+    try {
+      res.clearCookie('user');
+      res.status(200).json({ statut: true, message: 'User logout' });
+    } catch (e) {
+      res.status(500).json({ statut: false, message: e.message });
+    }
+  }
+
+  async getUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+      });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ statut: false, message: 'User not found' });
+      }
+
+      if (id != req.user.payload.id) {
+        return res
+          .status(400)
+          .json({ statut: false, message: 'You are not authorized' });
+      }
+      return res.status(200).json({ statut: true, message: user });
+    } catch (e) {
+      res.status(500).json({ statut: false, message: e.message });
+    }
+  }
+
+  async updateUser(
+    @Param('id') id: number,
+    @Body() userData: UserDto,
+    @Res() res: Response,
+    @Req() req,
+  ) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ statut: false, message: 'User not found' });
+      }
+
+      if (id != req.user.payload.id) {
+        return res
+          .status(400)
+          .json({ statut: false, message: 'You are not authorized' });
+      }
+
+      await this.userRepository.update(id, {
+        ...userData,
+        password: await hashPassword(userData.password),
+      });
+      return res.status(200).json({ statut: true, message: 'User updated' });
     } catch (e) {
       res.status(500).json({ statut: false, message: e.message });
     }

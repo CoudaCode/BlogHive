@@ -1,7 +1,9 @@
+import { Request } from 'express';
 export interface User {
   id: number;
   username: string;
   email: string;
+  newPassword?: string;
   password: string;
 }
 
@@ -25,4 +27,8 @@ export interface Comment {
   content: string;
   userId: number;
   articleId: number;
+}
+
+export interface RequestWithUser extends Request {
+  user?: User;
 }
