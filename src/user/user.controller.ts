@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -45,5 +46,11 @@ export class UserController {
     @Req() req,
   ) {
     return await this.userService.updateUser(id, userData, res, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
+    return await this.userService.deleteUser(id, res, req);
   }
 }

@@ -6,10 +6,8 @@ import { comparePassword, hashPassword } from 'src/utils/hash';
 import { Repository } from 'typeorm';
 import { UserDto } from './user.dto';
 import { User } from './user.entity';
-import { RequestWithUser } from 'src/Types/interface';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { Request } from 'express';
 @Injectable()
 export class UserService {
   constructor(
@@ -99,6 +97,7 @@ export class UserService {
     }
   }
 
+  @UseGuards(AuthGuard)
   async getUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
     try {
       const user = await this.userRepository.findOne({
@@ -121,6 +120,7 @@ export class UserService {
     }
   }
 
+  @UseGuards(AuthGuard)
   async updateUser(
     @Param('id') id: number,
     @Body() userData: UserDto,
@@ -149,6 +149,31 @@ export class UserService {
         password: await hashPassword(userData.password),
       });
       return res.status(200).json({ statut: true, message: 'User updated' });
+    } catch (e) {
+      res.status(500).json({ statut: false, message: e.message });
+    }
+  }
+  @UseGuards(AuthGuard)
+  async deleteUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ statut: false, message: 'User not found' });
+      }
+
+      if (id != req.user.payload.id) {
+        return res
+          .status(400)
+          .json({ statut: false, message: 'You are not authorized' });
+      }
+
+      await this.userRepository.delete(id);
+      return res.status(200).json({ statut: true, message: 'User deleted' });
     } catch (e) {
       res.status(500).json({ statut: false, message: e.message });
     }
