@@ -31,7 +31,7 @@ export const generateToken = (
   configService: ConfigService,
 ): string => {
   const secret = configService.get<string>('JWT_SECRET');
-  return jwtService.sign({ payload }, { secret });
+  return jwtService.sign({ payload }, { secret, expiresIn: '1h'});
 };
 
 // Fonction pour vérifier un token JWT

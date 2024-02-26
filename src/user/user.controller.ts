@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -11,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { UserDto } from './user.dto'; // Assurez-vous que le chemin est correct
+import { UserDto } from '../dtos/user.dto'; // Assurez-vous que le chemin est correct
 import { UserService } from './user.service';
 @Controller('user')
 export class UserController {
@@ -45,5 +46,11 @@ export class UserController {
     @Req() req,
   ) {
     return await this.userService.updateUser(id, userData, res, req);
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async deleteUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
+    return await this.userService.deleteUser(id, res, req);
   }
 }

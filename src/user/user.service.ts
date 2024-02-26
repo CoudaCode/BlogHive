@@ -1,15 +1,12 @@
-import { Body, Injectable, Param, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Injectable, Param, Req, Res } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { generateToken } from 'src/utils/Token';
 import { comparePassword, hashPassword } from 'src/utils/hash';
 import { Repository } from 'typeorm';
-import { UserDto } from './user.dto';
-import { User } from './user.entity';
-import { RequestWithUser } from 'src/Types/interface';
-import { ConfigService } from '@nestjs/config';
-import { AuthGuard } from 'src/guard/auth.guard';
-import { Request } from 'express';
+import { UserDto } from '../dtos/user.dto';
+import { User } from '../entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(
@@ -137,6 +134,31 @@ export class UserService {
           .status(404)
           .json({ statut: false, message: 'User not found' });
       }
+      if (id != req.user.payload.id) {
+        return res
+          .status(400)
+          .json({ statut: false, message: 'You are not authorized' });
+      }
+      await this.userRepository.update(id, {
+        ...userData,
+        password: await hashPassword(userData.password),
+      });
+      return res.status(200).json({ statut: true, message: 'User updated' });
+    } catch (e) {
+      res.status(500).json({ statut: false, message: e.message });
+    }
+  }
+  async deleteUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ statut: false, message: 'User not found' });
+      }
 
       if (id != req.user.payload.id) {
         return res
@@ -144,11 +166,8 @@ export class UserService {
           .json({ statut: false, message: 'You are not authorized' });
       }
 
-      await this.userRepository.update(id, {
-        ...userData,
-        password: await hashPassword(userData.password),
-      });
-      return res.status(200).json({ statut: true, message: 'User updated' });
+      await this.userRepository.delete(id);
+      return res.status(200).json({ statut: true, message: 'User deleted' });
     } catch (e) {
       res.status(500).json({ statut: false, message: e.message });
     }
