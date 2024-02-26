@@ -1,4 +1,4 @@
-import { Body, Injectable, Param, Req, Res } from '@nestjs/common';
+import { Body, Injectable, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
@@ -7,6 +7,8 @@ import { comparePassword, hashPassword } from 'src/utils/hash';
 import { Repository } from 'typeorm';
 import { UserDto } from '../dtos/user.dto';
 import { User } from '../entities/user.entity';
+import { AuthGuard } from '../guard/auth.guard';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -96,6 +98,7 @@ export class UserService {
     }
   }
 
+  @UseGuards(AuthGuard)
   async getUser(@Param('id') id: number, @Res() res: Response, @Req() req) {
     try {
       const user = await this.userRepository.findOne({
@@ -118,6 +121,7 @@ export class UserService {
     }
   }
 
+  @UseGuards(AuthGuard)
   async updateUser(
     @Param('id') id: number,
     @Body() userData: UserDto,
