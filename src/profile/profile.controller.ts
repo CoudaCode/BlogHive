@@ -44,7 +44,6 @@ export class ProfileController {
   getProfile(@Param('id') id: number, @Res() res: Response, @Req() req) {
     return this.profileService.getProfile(id, res, req);
   }
-
   @UseGuards(AuthGuard)
   @Delete(':id/profile')
   deleteProfile(@Param('id') id: number, @Res() res: Response, @Req() req) {
