@@ -26,5 +26,5 @@ export class User {
   profile: Profile;
 
   @OneToMany(() => Article, (article) => article.user)
-  article: Article[];
+  articles: Article[];
 }

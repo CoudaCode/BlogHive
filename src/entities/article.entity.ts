@@ -1,24 +1,26 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
-  OneToOne,
-  OneToMany,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Comment } from './comment.entity';
-
+import { User } from './user.entity';
 @Entity()
 export class Article {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column()
+  @Column({ unique: true })
   title: string;
-  @Column()
+  @Column({ unique: true })
   content: string;
 
-  @OneToOne(() => User, (user) => user.article)
+  @OneToMany(() => Comment, (comment) => comment.article)
+  comments: Comment[];
+
+  @ManyToOne(() => User, (user) => user.articles)
   @JoinColumn()
   user: User;
 }
