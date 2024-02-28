@@ -14,6 +14,9 @@ import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { profileDto } from './../dtos/profile.dto';
 import { ProfileService } from './profile.service';
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags('Profile')
 @Controller('user')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}

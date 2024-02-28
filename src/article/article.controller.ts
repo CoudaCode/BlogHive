@@ -13,6 +13,9 @@ import {
 import { ArticleDto } from 'src/dtos/article.dto';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { ArticleService } from './article.service';
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags('Article')
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}

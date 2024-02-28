@@ -10,10 +10,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { UserDto } from '../dtos/user.dto'; // Assurez-vous que le chemin est correct
 import { UserService } from './user.service';
+
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
