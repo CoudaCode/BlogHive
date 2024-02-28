@@ -43,28 +43,18 @@ export class CommentController {
   }
 
   @UseGuards(AuthGuard)
-  // @Get(':commentId')
-  // async getCommentsByArticle(
-  //   @Param('articleId') articleId: number,
-  //   @Param('id') commentId: number,
-  //   @Req() req,
-  //   @Req() res,
-  // ) {
-  //   return await this.commentService.getCommentsByArticle(commentId, req, res);
-  // }
-  @UseGuards(AuthGuard)
   @Put(':commentId')
   async updateComment(
+    @Body() commentData: CommentDto,
     @Param('articleId') articleId: number,
     @Param('commentId') commentId: number,
-    commentData: CommentDto,
     @Req() req,
-    @Req() res,
+    @Res() res,
   ) {
     return await this.commentService.updateComment(
+      commentData,
       articleId,
       commentId,
-      commentData,
       req,
       res,
     );
@@ -75,7 +65,7 @@ export class CommentController {
     @Param('articleId') articleId: number,
     @Param('commentId') commentId: number,
     @Req() req,
-    @Req() res,
+    @Res() res,
   ) {
     return await this.commentService.deleteComment(
       articleId,
@@ -83,5 +73,15 @@ export class CommentController {
       req,
       res,
     );
+  }
+
+  @UseGuards(AuthGuard)
+  @Get()
+  async getComments(
+    @Param('articleId') articleId: number,
+    @Req() req,
+    @Res() res,
+  ) {
+    return await this.commentService.getCommentsByArticle(articleId, req, res);
   }
 }

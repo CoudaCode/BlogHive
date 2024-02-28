@@ -3,12 +3,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
 import { Article } from './article.entity';
+import { User } from './user.entity';
 @Entity()
 export class Comment {
   @PrimaryGeneratedColumn()
@@ -24,7 +22,7 @@ export class Comment {
   @JoinColumn()
   article: Article;
 
-  @OneToOne(() => User, (user) => user.comment)
+  @ManyToOne(() => User, (user) => user.comment)
   @JoinColumn()
   user: User;
 }
