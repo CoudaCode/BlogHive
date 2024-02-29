@@ -1,7 +1,17 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { CommentDto } from './comment.dto';
 import { UserDto } from './user.dto';
 export class ArticleDto {
+  @ApiProperty({
+    example: 'Demon Slayer',
+    required: true,
+  })
   title: string;
+
+  @ApiProperty({
+    example: 'Demon Slayer is a Japanese manga series written',
+    required: true,
+  })
   content: string;
   comments: CommentDto[];
   user: UserDto;

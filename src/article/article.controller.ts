@@ -10,11 +10,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ArticleDto } from 'src/dtos/article.dto';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { ArticleService } from './article.service';
-import { ApiTags } from '@nestjs/swagger';
-
 @ApiTags('Article')
 @Controller('article')
 export class ArticleController {
@@ -22,12 +21,29 @@ export class ArticleController {
 
   @UseGuards(AuthGuard)
   @Post()
+  @ApiResponse({
+    status: 201,
+    description: 'The record has been successfully created.',
+  })
+  @ApiResponse({ status: 404, description: 'Artcile already exist' })
+  @ApiResponse({ status: 400, description: 'Article not created' })
+  @ApiResponse({ status: 401, description: 'Token is expired' })
+  @ApiBody({
+    type: ArticleDto,
+    description: 'Json structure  for article object',
+  })
   async createArticle(@Body() articleData: ArticleDto, @Req() req, @Res() res) {
     // return await this.articleService.createArticle(articleData, req, res);
     return await this.articleService.createArticle(articleData, req, res);
   }
   @UseGuards(AuthGuard)
   @Get()
+  @ApiResponse({
+    status: 201,
+    description: 'The record has been successfully created.',
+  })
+  @ApiResponse({ status: 404, description: 'Artcile already exist' })
+  @ApiResponse({ status: 401, description: 'Token is expired' })
   async getAllArticles(@Req() req, @Res() res) {
     // return await this.articleService.getAllArticles(req, res);
     return await this.articleService.getAllArticlesByUser(req, res);
